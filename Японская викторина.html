@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本  викторина</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+        /* ЗДЕСЬ БУДЕТ ВАШ ФОН */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* background: linear-gradient(165deg, #ecd9b4 0%, #b8a88c 30%, #6d8a7d 70%, #2f4f4f 100%); */
+    	    background: url('97dc671151968f2547321ff39d632f3c.png') center/cover no-repeat;
+            opacity: 0.5;
+            z-index: -1;
+        }
+        .game-container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 40px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -8px rgba(0,0,0,0.7), 0 0 0 2px #b8860b inset;
+            border: 1px solid #daa520;
+        }
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .title h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #f5e7c8, #ffb347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff9900;
+        }
+        .title p {
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            font-style: italic;
+        }
+        .score-area {
+            background: #2a2a2a;
+            border-radius: 60px;
+            padding: 15px 30px;
+            border: 2px solid #b8860b;
+            box-shadow: inset 0 2px 5px #000;
+        }
+        .score-area span {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd966;
+            margin-right: 15px;
+        }
+        .score-area button {
+            background: #b8860b;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 25px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 5px 0 #6b4a0b;
+            color: white;
+        }
+        .score-area button:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        
+        /* Game grid */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .category-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .category-header {
+            background: #6b4a0b;
+            color: #f5e6b0;
+            text-align: center;
+            padding: 15px 5px;
+            border-radius: 30px 30px 10px 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 2px solid #b8860b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            word-break: break-word;
+            box-shadow: 0 5px 0 #4a2a0b;
+        }
+        .card {
+            background: #1e1e1e;
+            border: 2px solid #b8860b;
+            border-radius: 20px;
+            padding: 20px 5px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f0c674;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 7px 0 #6b4a0b;
+            user-select: none;
+        }
+        .card.available:hover {
+            background: #3a2a0a;
+            transform: scale(1.02);
+            border-color: #ffd966;
+        }
+        .card.used {
+            background: #2a2a2a;
+            color: #505050;
+            border-color: #505050;
+            box-shadow: 0 3px 0 #303030;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        /* Question panel */
+        .question-panel {
+            background: #231f1b;
+            border-radius: 50px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px solid #b68b40;
+            box-shadow: inset 0 0 15px #000;
+        }
+        .question-text {
+            color: #fadfad;
+            font-size: 1.7rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .option-btn {
+            background: #33302b;
+            border: 2px solid #a67c52;
+            border-radius: 60px;
+            padding: 18px 10px;
+            font-size: 1.2rem;
+            color: #ffe4b5;
+            cursor: pointer;
+            transition: 0.1s;
+            text-align: left;
+            padding-left: 25px;
+        }
+        .option-btn:hover:not(:disabled) {
+            background: #524530;
+            border-color: #e6b422;
+            transform: translateY(-2px);
+        }
+        .option-btn.selected-correct {
+            background: #1f7a1f;
+            border-color: gold;
+            color: white;
+        }
+        .option-btn.selected-wrong {
+            background: #8b1a1a;
+            border-color: darkred;
+            color: #ffcccc;
+        }
+        .option-btn:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+        .feedback {
+            font-size: 1.4rem;
+            padding: 15px;
+            border-radius: 40px;
+            background: #2b241c;
+            border-left: 10px solid #d4a017;
+            color: #f0e6d2;
+            margin-top: 20px;
+        }
+        .btn-reset-current {
+            background: #665d4b;
+            border: none;
+            border-radius: 40px;
+            padding: 10px 25px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+        .winner-message {
+            text-align: center;
+            background: radial-gradient(circle, #3f2b1f, #1a110a);
+            padding: 40px;
+            border-radius: 60px;
+            border: 4px solid gold;
+            font-size: 3rem;
+            color: #fff1b5;
+        }
+        .footer {
+            text-align: center;
+            color: #9e8b6f;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="title">
+                <h1>🗡️ 日本 • ТАЙНЫ ЯПОНИИ</h1>
+                <p>Выберите вопрос • Отвечайте • Следите за счётом</p>
+            </div>
+            <div class="score-area">
+                <span id="scoreDisplay">0</span> очков
+                <button id="resetGameBtn">🔄 Новая игра</button>
+            </div>
+            </div>
+
+        <!-- ИГРОВОЕ ПОЛЕ (категории) -->
+        <div id="gameBoard" class="categories"></div>
+
+        <!-- ПАНЕЛЬ ВОПРОСА -->
+        <div id="questionPanel" class="question-panel" style="display: none;">
+            <div class="question-text" id="questionText">Загрузка...</div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="feedback" id="feedbackArea"></div>
+            <button class="btn-reset-current" id="closeQuestionBtn">✖ Закрыть вопрос</button>
+        </div>
+
+        <!-- СООБЩЕНИЕ (просто для красоты) -->
+        <div id="winnerPanel" style="display: none;" class="winner-message">
+            🎉 ОТЛИЧНАЯ ИГРА! 🎉
+        </div>
+        <div class="footer">Викторина • основано на реальных вопросах</div>
+    </div>
+
+    <script>
+        (function() {
+            // --- База вопросов (категории + вопросы + цена + ответ) ---
+            const questionsDB = [
+                // ЭТИКЕТ И ТРАДИЦИИ (cat0)
+                { category: 0, price: 100, question: "Входя в традиционное японское додзё (как и в храм), принято совершать определенное действие. Какое?", 
+                  options: ["A) Похлопать в ладоши", "B) Поклониться (одзиги)", "C) Снять обувь носками от двери"], 
+                  correct: 1, comment: "Поклон — основа японского этикета, знак уважения к месту и традиции." },
+                { category: 0, price: 200, question: "Вы пришли в японский дом и сняли обувь. Куда поставить обувь носками?",
+                  options: ["A) Носками к выходу", "B) Носками в комнату", "C) Без разницы"],
+                  correct: 0, comment: "Обувь всегда разворачивают носками к двери — правило порядка и уважения." },
+                { category: 0, price: 300, question: "Правда ли, что в Японии можно спать на рабочем месте, и это не наказуемо, а поощряется?",
+                  options: ["A) Да, это правда", "B) Нет, уволят"],
+                  correct: 0, comment: "Инэмури — «присутствие во сне». Считается признаком трудолюбия." },
+                { category: 0, price: 400, question: "Какое действие с палочками для еды (хаси) напоминает похоронный ритуал и категорически запрещено?",
+                  options: ["A) Скрещивать палочки", "B) Держать в кулаке", "C) Втыкать вертикально в рис"],
+                  correct: 2, comment: "На похоронах в чашку с рисом вертикально втыкают палочки. За столом — табу." },
+                
+                // РЕЛИГИЯ И ФОЛЬКЛОР (cat1)
+                { category: 1, price: 100, question: "Как называют лис-оборотней, которые могут принимать человеческий облик?",
+                  options: ["A) Тануки", "B) Кицунэ", "C) Нэкомата"],
+                  correct: 1, comment: "Кицунэ — посланники бога Инари, чем больше хвостов, тем могущественнее." },
+                { category: 1, price: 200, question: "Какой мифический персонаж (полубожество с длинным носом) считается покровителем воинских искусств?",
+                  options: ["A) Они", "B) Юрэй", "C) Тэнгу"],
+                  correct: 2, comment: "Тэнгу живут в горах и, по легендам, обучали легендарных воинов." },
+                { category: 1, price: 300, question: "Правда ли, что Чебурашка — культовый персонаж в Японии?",
+                  options: ["A) Да, правда", "B) Нет, его там не знают"],
+                  correct: 0, comment: "Аниме про Чебурашку (Чебу) вышло в прокат и стало очень популярным." },
+                { category: 1, price: 400, question: "Как сами японцы называют свою страну?",
+                  options: ["A) Ямато", "B) Нихон (Ниппон)", "C) Эдо"],
+                  correct: 1, comment: "Нихон означает «место, где восходит солнце» — Страна восходящего солнца." },
+                
+                // БОЕВЫЕ ИСКУССТВА (cat2)
+                { category: 2, price: 100, question: "В чем разница между кендо и кэндзюцу?",
+                  options: ["A) Это одно и то же", "B) Кэндзюцу — спорт, кендо — древнее искусство", "C) Кэндзюцу — искусство войны, кендо — путь самосовершенствования"],
+                  correct: 2, comment: "Кэндзюцу учило победе в бою, кендо воспитывает характер через спорт." },
+                { category: 2, price: 200, question: "Почему в Японии не принято смотреть собеседнику прямо в глаза?",
+                  options: ["A) Это вызов и агрессия", "B) Это флирт", "C) Мешает читать мысли"],
+                  correct: 0, comment: "Пристальный взгляд мог быть поводом для дуэли среди самураев." },
+                { category: 2, price: 300, question: "Какое аниме 2024 года содержит отсылки к самурайскому кодексу и темы самопожертвования?",
+                  options: ["A) Атака Титанов", "B) Наруто", "C) Истребитель демонов"],
+                  correct: 0, comment: "«Атака Титанов» перекликается с самурайским духом." },
+                { category: 2, price: 400, question: "Катори Синто-рю — комплексная система. Назовите два других вида оружия (кроме меча).",
+                  options: ["A) Бо (шест) и нагината", "B) Лук и огнестрел", "C) Сюркен и кастет"],
+                  correct: 0, comment: "Изучают бодзюцу, нагинатадзюцу, содзюцу и др." },
+                
+                // ЯЗЫК И ОБЩЕНИЕ (cat3)
+                { category: 3, price: 100, question: "Как японец вежливо откажет, не говоря «нет»?",
+                  options: ["A) Это невозможно", "B) Это будет трудно", "C) Я подумаю"],
+                  correct: 1, comment: "Фраза «это трудно» — вежливый отказ." },
+                { category: 3, price: 200, question: "Какой дефект внешности считался у гейш признаком красоты?",
+                  options: ["A) Косоглазие", "B) Веснушки", "C) Кривозубость"],
+                  correct: 2, comment: "Лёгкая кривозубость (яэба) считалась пикантной чертой." },
+                { category: 3, price: 300, question: "Сначала рисуют аниме, а потом по нему создают мангу?",
+                  options: ["A) Да", "B) Нет, наоборот"],
+                  correct: 1, comment: "Манга — первоисточник, аниме снимают по ней." },
+                { category: 3, price: 400, question: "Что означает слово «Нихон»?",
+                  options: ["A) Страна самураев", "B) Место восхода солнца", "C) Страна цветущей сакуры"],
+                  correct: 1, comment: "Буквально — «корень солнца»." },
+                
+                // ЕДА И БЫТ (cat4)
+                { category: 4, price: 100, question: "Почему японцы громко хлебают лапшу?",
+                  options: ["A) Показывают голод", "B) Комплимент повару", "C) Не хватает воздуха"],
+                  correct: 1, comment: "Так вы показываете, что лапша вкусная." },
+                { category: 4, price: 200, question: "Правда ли, что в Японии на Рождество заказывают KFC?",
+                  options: ["A) Правда", "B) Ложь"],
+                  correct: 0, comment: "Маркетинговая кампания 1970-х сделала KFC рождественской традицией." },
+                { category: 4, price: 300, question: "Запрещено ли читать мангу в кафе?",
+                  options: ["A) Да", "B) Нет, есть манга-кафе"],
+                  correct: 1, comment: "Манга-кафе (манга кисса) — популярные заведения." },
+                { category: 4, price: 400, question: "Число 4 в Японии счастливое?",
+                  options: ["A) Да", "B) Нет, оно несчастливое"],
+                  correct: 1, comment: "4 звучит как «смерть» (си), его избегают." },
+                
+                // МИФЫ И ФАКТЫ (cat5)
+                { category: 5, price: 100, question: "Можно ли спать на работе в Японии? (повтор)", // дубль для наполнения, но лучше использовать уникальный.
+                  options: ["A) Да", "B) Нет"],
+                  correct: 0, comment: "Инэмури — обычное дело." },
+                { category: 5, price: 200, question: "Правда ли, что в Японии есть остров только с кроликами?",
+                  options: ["A) Да, Окуносима", "B) Нет"],
+                  correct: 0, comment: "Остров Окуносима (Кроличий остров) — туристическое место." },
+                { category: 5, price: 300, question: "Японские школьники сами убирают классы?",
+                  options: ["A) Да", "B) Нет, уборщицы"],
+                  correct: 0, comment: "Уборка — часть воспитания." },
+                { category: 5, price: 400, question: "Едят ли в Японии дельфинов?",
+                  options: ["A) Да, в некоторых регионах", "B) Никогда"],
+                  correct: 0, comment: "Традиция существует, но спорная." }
+            ];
+
+            // названия категорий
+            const catNames = [
+                "ЭТИКЕТ И ТРАДИЦИИ",
+                "РЕЛИГИЯ И ФОЛЬКЛОР",
+                "БОЕВЫЕ ИСКУССТВА",
+                "ЯЗЫК И ОБЩЕНИЕ",
+                "ЕДА И БЫТ",
+                "МИФЫ И ФАКТЫ"
+            ];
+
+            // Состояние игры
+            let score = 0;
+            let usedQuestions = new Array(questionsDB.length).fill(false);
+            let currentQuestionIndex = -1;
+            let gameFinished = false;
+
+            // Элементы DOM
+            const boardDiv = document.getElementById('gameBoard');
+            const scoreSpan = document.getElementById('scoreDisplay');
+            const questionPanel = document.getElementById('questionPanel');
+            const questionText = document.getElementById('questionText');
+            const optionsDiv = document.getElementById('optionsContainer');
+            const feedbackDiv = document.getElementById('feedbackArea');
+            const closeBtn = document.getElementById('closeQuestionBtn');
+            const resetBtn = document.getElementById('resetGameBtn');
+            const winnerPanel = document.getElementById('winnerPanel');
+            const goalIndicator = document.getElementById('goalIndicator');
+
+            // Обновление счета
+            function updateScore() {
+                scoreSpan.textContent = score;
+                // ПРОСТО ОТОБРАЖАЕМ СЧЕТ, НИКАКОЙ ПОБЕДЫ НЕ ТРЕБУЕМ
+            }
+
+            // Отрисовка игрового поля
+            function renderBoard() {
+                boardDiv.style.display = 'grid';
+                winnerPanel.style.display = 'none';
+
+                // группируем вопросы по категориям
+                let cats = [[], [], [], [], [], []];
+                questionsDB.forEach((q, idx) => {
+                    if (!usedQuestions[idx]) cats[q.category].push({ ...q, idx });
+                });
+
+                let html = '';
+                for (let c = 0; c < 6; c++) {
+                    html += `<div class="category-col"><div class="category-header">${catNames[c]}</div>`;
+                    // карточки цен 100,200,300,400
+                    for (let p of [100,200,300,400]) {
+                        let qItem = cats[c].find(q => q.price === p);
+                        if (qItem) {
+                            html += `<div class="card available" data-qidx="${qItem.idx}">${p}</div>`;
+                        } else {
+                            html += `<div class="card used" style="pointer-events: none;">${p}</div>`;
+                        }
+                    }
+                    html += '</div>';
+                }
+                boardDiv.innerHTML = html;
+
+                // Навесить обработчики
+                document.querySelectorAll('.card.available').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (gameFinished) return;
+                        let qidx = card.dataset.qidx;
+                        if (qidx !== undefined) openQuestion(parseInt(qidx));
+                    });
+                });
+            }
+
+            // Открыть вопрос
+            function openQuestion(qidx) {
+                if (usedQuestions[qidx] || gameFinished) return;
+                let q = questionsDB[qidx];
+                currentQuestionIndex = qidx;
+                questionText.textContent = `${q.question} (${q.price} очков)`;
+                
+                // Кнопки вариантов
+                let optsHtml = '';
+                q.options.forEach((opt, i) => {
+                    optsHtml += `<button class="option-btn" data-opt="${i}">${opt}</button>`;
+                });
+                optionsDiv.innerHTML = optsHtml;
+                feedbackDiv.innerHTML = '';
+
+                // обработчики вариантов
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (usedQuestions[currentQuestionIndex]) return;
+                        let selected = parseInt(btn.dataset.opt);
+                        let correct = q.correct;
+                        let isCorrect = (selected === correct);
+
+                        // Деактивируем все кнопки
+                        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+                        if (isCorrect) {
+                            btn.classList.add('selected-correct');
+                            score += q.price;
+                            updateScore();
+                            feedbackDiv.innerHTML = `✅ ВЕРНО! +${q.price} очков.<br> ${q.comment}`;
+                        } else {
+                            btn.classList.add('selected-wrong');
+                            // показать правильный
+                            document.querySelectorAll('.option-btn')[correct].classList.add('selected-correct');
+                            score -= q.price;  // УХОДИМ В МИНУС - НИКАКОЙ ПРОВЕРКИ
+                            updateScore();
+                            feedbackDiv.innerHTML = `❌ НЕВЕРНО. -${q.price} очков.<br>Правильный ответ: ${q.options[correct]}<br>${q.comment}`;
+                        }
+                        // Пометить вопрос использованным
+                        usedQuestions[currentQuestionIndex] = true;
+                        // обновим доску
+                        renderBoard();
+                    });
+                });
+
+                questionPanel.style.display = 'block';
+            }
+
+            // Закрыть панель вопроса
+            closeBtn.addEventListener('click', () => {
+                questionPanel.style.display = 'none';
+                if (currentQuestionIndex !== -1 && !usedQuestions[currentQuestionIndex]) {
+                    // не наказываем
+                }
+                renderBoard(); 
+            });
+
+            // Сброс игры
+            function resetGame() {
+                score = 0;
+                usedQuestions.fill(false);
+                gameFinished = false;
+                currentQuestionIndex = -1;
+                updateScore();
+                questionPanel.style.display = 'none';
+                winnerPanel.style.display = 'none';
+                boardDiv.style.display = 'grid';
+                renderBoard();
+            }
+
+            resetBtn.addEventListener('click', resetGame);
+
+            // Первоначальный рендер
+            resetGame();
+        })();
+    </script>
+</body>
+</html>
